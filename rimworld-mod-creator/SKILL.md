@@ -5,7 +5,9 @@ description: "Create RimWorld mods (XML Defs, C# Harmony patches, Patches, trans
 
 # RimWorld Mod Creator
 
-基于对 234 个 Steam 创意工坊模组的逆向工程分析，提供 RimWorld 模组制作的完整知识体系。支持制作纯 XML 内容模组、C# 功能模组、兼容补丁和汉化模组。
+一个面向 TRAE 的 RimWorld 模组制作技能。基于对 234 个 Steam 创意工坊模组的逆向工程分析，把真实模组中归纳出的目录约定、代码范式和常见坑点固化为一套可按需加载的知识体系，替代散落在 wiki 与论坛中的零散经验。
+
+支持四种主流模组类型的完整制作链路：纯 XML 内容模组、C# 功能模组（Harmony Patch）、兼容补丁、汉化模组。所有代码示例取自真实模组（BionicIcons、Gunplay、yayoAni、Pick Up And Haul、EqualMilking、Ratkin）并经过验证，遵循工坊主流写法。
 
 ## 适用场景
 
