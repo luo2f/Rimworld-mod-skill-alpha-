@@ -1,6 +1,10 @@
 # RimWorld Mod Creator
 
-> 一个面向 TRAE 的 RimWorld 模组制作技能。基于对 234 个 Steam 创意工坊模组的逆向工程分析，把散落在 wiki、论坛帖子和他人源码里的模组制作经验，提炼成一套结构化、可按需加载的知识体系。
+![version](https://img.shields.io/badge/version-v0.1-f78166) ![license](https://img.shields.io/badge/license-MIT-3fb950) ![rimworld](https://img.shields.io/badge/RimWorld-1.4%E2%80%931.6-79c0ff)
+
+> 一个通用的 RimWorld 模组制作 AI Skill。基于对 234 个 Steam 创意工坊模组的逆向工程分析，把散落在 wiki、论坛帖子和他人源码里的模组制作经验，提炼成一套结构化、可按需加载的知识体系，可接入任意支持 Skill 的 AI 助手。
+
+**下载 v0.1**：[rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip) · **在线页面**：[GitHub Pages](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)
 
 RimWorld 的模组生态庞大，但官方文档有限，真正可靠的制作知识往往要靠阅读别人的源码和反复试错才能积累。这个技能把从 234 个真实工坊模组中统计出的约定、范式和坑点固化下来，让 AI 助手在用户提出模组制作需求时，能直接调取对应领域的准确参考，而不是凭模糊记忆拼凑。
 
@@ -70,7 +74,7 @@ flowchart TD
 
 ```
 .
-├── rimworld-mod-creator/        # TRAE 技能本体
+├── rimworld-mod-creator/        # 技能本体
 │   ├── SKILL.md                 # 技能入口与工作流程定义
 │   └── references/              # 六份按需加载的深度参考
 │       ├── about-and-loadfolders.md
@@ -79,15 +83,32 @@ flowchart TD
 │       ├── patches.md
 │       ├── translation-and-assets.md
 │       └── xml-defs.md
+├── docs/                        # GitHub Pages 站点
+│   ├── index.html               # 在线落地页
+│   ├── rimworld-mod-creator-v0.1.zip  # v0.1 下载包
+│   └── .nojekyll
+├── .github/workflows/           # CI：Pages 自动部署
+│   └── deploy-pages.yml
 └── rimworld-mod-guide/          # 完整 HTML 指南（离线可读）
     └── rimworld-mod-guide.html.zip
 ```
 
-`SKILL.md` 是技能的入口文件，定义了适用场景、工作流程和关键约定速查；`references/` 下的文档由技能在运行时按需加载，普通用户无需手动查阅。`rimworld-mod-guide` 是同一套知识的独立 HTML 合集，解压后可在浏览器中通读。
+`SKILL.md` 是技能的入口文件，定义了适用场景、工作流程和关键约定速查；`references/` 下的文档由技能在运行时按需加载，普通用户无需手动查阅。`docs/` 托管在线落地页与下载包，推送后由 GitHub Actions 自动部署到 Pages。`rimworld-mod-guide` 是同一套知识的独立 HTML 合集，解压后可在浏览器中通读。
+
+## 下载与部署
+
+当前版本为 **v0.1**。两种获取方式：
+
+- **直接下载**：[rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip)，解压即得到 `SKILL.md` 与 6 份参考文档
+- **在线页面**：[GitHub Pages 落地页](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)，可在浏览器中预览技能概览
+
+下载包内容与仓库 `rimworld-mod-creator/` 目录一致，可直接放入支持 Skill 的 AI 助手的加载路径使用。
+
+GitHub Pages 通过 `.github/workflows/deploy-pages.yml` 自动部署：每当 `docs/` 目录有更新推送到主分支，Action 会重新构建并发布站点。首次使用需在仓库 Settings → Pages 中将 Source 设为 `GitHub Actions`。
 
 ## 如何使用
 
-本技能面向 TRAE 平台。将 `rimworld-mod-creator` 目录放入 TRAE 的技能加载路径后，技能会被自动识别。之后用自然语言描述需求即可触发，无需记忆任何命令。
+本技能是通用 AI Skill，可接入任意支持 Skill 的 AI 助手。将 `rimworld-mod-creator` 目录放入对应助手的知识/技能加载路径后，技能会被自动识别。之后用自然语言描述需求即可触发，无需记忆任何命令。
 
 触发示例：
 
@@ -150,4 +171,4 @@ flowchart TD
 
 ## 许可证
 
-[MIT License](./LICENSE) © 2026 Chaos_Florence
+[MIT License](./LICENSE) © 2026 luo2f

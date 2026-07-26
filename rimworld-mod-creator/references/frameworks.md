@@ -24,8 +24,9 @@
 | NuGet 包 | 用途 | 典型用法 |
 |----------|------|---------|
 | `Krafs.Rimworld.Ref` | RimWorld API 引用（替代本地 DLL） | `<PackageReference Version="1.6.*-*"/>` |
-| `Lib.Harmony` | Harmony 库引用 | `ExcludeAssets="runtime"`（不打包运行时） |
-| `Krafs.Publicizer` | 将 private/internal 成员公开为 public | `<Publicize Include="Assembly-CSharp"/>` |
+| `Lib.Harmony` | Harmony 库引用（依赖合并的单文件版，推荐） | `ExcludeAssets="runtime"`（不打包运行时） |
+| `Lib.Harmony.Thin` | Harmony 库引用（不含依赖，需自行提供运行时依赖） | 需自行保证 `0Harmony.dll` 在运行时可用 |
+| `Krafs.Publicizer` | 将 private/internal 成员公开为 public（MSBuild 插件） | `<Publicize Include="Assembly-CSharp"/>`，须配 `<PrivateAssets>all</PrivateAssets>` |
 | `Zetrith.Prepatcher` | 预 patch 工具（编译期生成字段访问） | yayoAni 等使用 |
 
 ## DLC packageId

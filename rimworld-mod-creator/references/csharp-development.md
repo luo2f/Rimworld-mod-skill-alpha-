@@ -27,7 +27,10 @@ RimWorld C# 模组有两种 .csproj 风格。
   <ItemGroup>
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*-*" />
     <PackageReference Include="Lib.Harmony" Version="2.4.2" ExcludeAssets="runtime" />
-    <PackageReference Include="Krafs.Publicizer" Version="2.3.0" />
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Publicize Include="Assembly-CSharp"/>
@@ -37,7 +40,48 @@ RimWorld C# 模组有两种 .csproj 风格。
 
 - `Krafs.Rimworld.Ref` 包含 RimWorld API + UnityEngine 传递依赖
 - `ExcludeAssets="runtime"` 表示编译时引用 Harmony 但不打包其 DLL
-- `<Publicize>` 自动将 `Assembly-CSharp.dll` 的 private/internal 成员公开为 public
+- `Krafs.Publicizer` 是 MSBuild 插件，必须配 `<PrivateAssets>all</PrivateAssets>` 防止其依赖泄漏给模组消费者
+
+### Publicizer 精确控制
+
+`<Publicize>` 按程序集**文件名**（不含 `.dll` 扩展名）引用，支持从粗到细的粒度：
+
+```xml
+<ItemGroup>
+  <!-- 整个程序集 -->
+  <Publicize Include="Assembly-CSharp" />
+
+  <!-- 精确到类型、字段、属性、方法、嵌套类型 -->
+  <Publicize Include="Assembly-CSharp:Verse.Pawn" />
+  <Publicize Include="Assembly-CSharp:Verse.Pawn.pather" />
+  <Publicize Include="Assembly-CSharp:Verse.Pawn.Destroy" />
+
+  <!-- 正则匹配一组成员 -->
+  <Publicize Include="Assembly-CSharp" MemberPattern="^Verse\.Pawn\..*" />
+</ItemGroup>
+
+<!-- 公开化本项目引用的全部程序集（慎用） -->
+<PropertyGroup>
+  <PublicizeAll>true</PublicizeAll>
+</PropertyGroup>
+```
+
+两个会运行时报错的结构性坑，必须用排除项规避：
+
+1. **重写 publicized 的虚成员会抛异常**。原程序集里 `protected abstract` 成员被改写为 `public`，你的子类用 `public override` 重写后，运行时加载的原程序集仍是 `protected`，访问检查不匹配。解法：
+
+```xml
+<ItemGroup>
+  <Publicize Include="Assembly-CSharp" />
+  <!-- 跳过所有虚成员，或单独排除某个成员 -->
+  <Publicize Include="Assembly-CSharp" IncludeVirtualMembers="false" />
+  <DoNotPublicize Include="Assembly-CSharp:Verse.Person.Name" />
+</ItemGroup>
+```
+
+2. **编译器生成的成员（如事件 backing field）改名后可能与其它成员冲突**，用 `IncludeCompilerGeneratedMembers="false"` 整体跳过，再按需单独公开。
+
+注意：Publicizer 无法只公开化某个方法重载——指定方法名会公开化它的所有重载。
 
 ### 旧式 .csproj（直引本地 DLL）
 
