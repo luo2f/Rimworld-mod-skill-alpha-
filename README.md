@@ -1,162 +1,197 @@
 # RimWorld Mod Creator
 
-![version](https://img.shields.io/badge/version-v0.1-f78166) ![license](https://img.shields.io/badge/license-MIT-3fb950) ![rimworld](https://img.shields.io/badge/RimWorld-1.4%E2%80%931.6-79c0ff)
+![version](https://img.shields.io/badge/version-v0.2-f78166) ![license](https://img.shields.io/badge/license-MIT-3fb950) ![rimworld](https://img.shields.io/badge/RimWorld-1.6-79c0ff)
 
-> 一个通用的 RimWorld 模组制作 AI Skill。基于对 234 个 Steam 创意工坊模组的逆向工程分析，把散落在 wiki、论坛帖子和他人源码里的模组制作经验，提炼成一套结构化、可按需加载的知识体系，可接入任意支持 Skill 的 AI 助手。
+> 一个通用的 RimWorld 模组制作 AI Skill，覆盖从环境搭建、XML Def、C# Harmony 到 Steam Workshop 发布的全流程。内置 8 个代码模板、7 套工作流和错误自学习机制，可接入任意支持 Skill 的 AI 助手。
 
-**下载 v0.1**：[rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip) · **在线页面**：[GitHub Pages](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)
+**下载 v0.2**：[rimworld-mod-creator-v0.2.zip](./docs/rimworld-mod-creator-v0.2.zip) · **v0.1 归档**：[rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip) · **在线页面**：[GitHub Pages](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)
 
-RimWorld 的模组生态庞大，但官方文档有限，真正可靠的制作知识往往要靠阅读别人的源码和反复试错才能积累。这个技能把从 234 个真实工坊模组中统计出的约定、范式和坑点固化下来，让 AI 助手在用户提出模组制作需求时，能直接调取对应领域的准确参考，而不是凭模糊记忆拼凑。
+---
 
-## 核心能力
+## v0.2 有什么新变化
 
-技能覆盖四种主流模组类型的完整制作链路，从模组骨架搭建到引用校验：
+v0.2 从"纯知识参考"升级为"模板驱动 + 工作流编排 + 错误自学习"的完整制作体系：
 
-| 模组类型 | 必需文件 | 典型场景 |
-|----------|---------|---------|
-| 纯 XML 内容 | `About/About.xml` + `Defs/*.xml` + `Textures/` | 新增物品、建筑、武器、研究项目 |
-| C# 功能 | 上述 + `Source/*.cs` + `版本/Assemblies/*.dll` | 修改游戏行为、自定义逻辑 |
-| 兼容补丁 | `About/About.xml` + `Patches/*.xml` | 让两个 mod 协同工作 |
-| 汉化 | `About/About.xml` + `Languages/` | 翻译现有 mod |
+| 维度 | v0.1 | v0.2 |
+|------|------|------|
+| 参考文档 | 6 份 | **11 份**（新增环境搭建、调试排错、Workshop 发布、API 速查） |
+| 代码模板 | 无 | **8 个**（武器/服装/建筑/材料/配方/Harmony/ThingComp/需求清单） |
+| 工作流 | 无 | **7 套**（新建/添加/修补/调试/正规化/批量） |
+| 错误学习 | 无 | **自学习**（`learnings/errors.txt`，每次加载自动读取） |
+| 决策机制 | 按类型加载参考 | **三层决策**（有模板→直接用 / 报错→查原版 / 无模板→查+存模板） |
+| 制作流程 | 一步到位 | **测试版先行**（Test → Verify → Formalize） |
+| 目标版本 | 1.4–1.6 | **聚焦 1.6**（Unity 2022.3.35 / .NET 4.7.2+） |
 
-每一种类型都配套对应的目录约定与验证要点。例如 C# 模组必须声明 `brrainz.harmony` 依赖、编译输出落到版本子目录的 `Assemblies/`；汉化包则用 `loadAfter` 指向原 mod、`DefInjected` 子目录名必须与 Def 类型名完全一致。这些从真实模组中归纳出的约束，能避免模组无法加载或运行时崩溃。
+## 核心架构：三层决策
 
-## 知识来源
+技能每次接收模组制作请求时，按优先级判断走哪条路径，避免不必要的原版源码查阅：
 
-技能中的每一条约定和代码示例都不是凭空编写，而是来自对 234 个工坊模组的实际拆解。统计结果让技能知道什么才是"主流做法"，而非个例。
-
-```mermaid
-pie title 234 个模组的类型分布
-    "C# 代码模组" : 142
-    "纯 XML 内容模组" : 37
-    "汉化/翻译模组" : 37
-    "库/框架模组" : 12
-    "纯资源模组" : 6
+```
+用户请求
+  │
+  ├─ ① 有模板？ ─── 武器/服装/建筑/资源/配方/Harmony/ThingComp
+  │     └─ 直接用模板生成（模板已验证过原版结构）
+  │
+  ├─ ② 报错/调试？ ─── 红字/白窗/崩溃/NullReferenceException
+  │     └─ 查原版源码搜索错误原因（grep 或 dnSpy）
+  │
+  └─ ③ 无模板的新类型？ ─── 植物/生物/派系/事件/地形/Hediff/研究...
+        └─ 查原版 Def 结构 → 模仿写出 → 存储为新模板
 ```
 
-几个有代表性的发现：约 60.7% 的模组含 C# 代码，是功能实现的主力；约 70% 的 C# 模组依赖 Harmony（`brrainz.harmony`），它事实上是 C# 模组的基石；`loadAfter` 是最常见的加载顺序声明，出现在 74% 的模组中。技能内的框架清单、DLC packageId、高频被依赖项，都源自这些统计。
+模板已验证过原版字段名、枚举值和 ParentName 继承链，直接替换 `<Your...>` 占位符即可生成可用代码。遇到模板未覆盖的新类型，技能会查原版 Def 写出后**自动存为新模板**，下次同类请求直接免查。
+
+## 代码模板
+
+8 个模板覆盖最高频的模组制作需求，每个模板都带完整中文注释和原版参考路径：
+
+| 模板 | 文件 | 说明 |
+|------|------|------|
+| 近战武器 | `templates/weapon-melee.xml` | 继承 `BaseMeleeWeapon`，含 tools/costList |
+| 远程武器 | `templates/weapon-ranged.xml` | 继承 `BaseHumanMakeableGun`，含 verbs/projectile |
+| 服装/护甲 | `templates/apparel.xml` | 继承 `ApparelBase`，含 layers/statBases |
+| 原材料 | `templates/resource-stuff.xml` | `stuffProps` 完整配置 |
+| 建筑/工作台 | `templates/building.xml` | 含 comps（Power/Flickable 等） |
+| 制作配方 | `templates/recipe.xml` | ingredients/products/skillRequirements |
+| Harmony 补丁 | `templates/harmony-patch.cs` | Prefix/Postfix 骨架 + 注释 |
+| C# ThingComp | `templates/thingcomp.cs` | Comp + CompProperties 配对骨架 |
+
+## 工作流
+
+7 套工作流覆盖模组制作全生命周期，遵循"测试版先行"原则：
+
+| 工作流 | 文件 | 触发场景 |
+|--------|------|---------|
+| 新建 Mod | `workflows/new-mod.md` | 从零创建项目（测试版先行） |
+| 添加物品 | `workflows/add-item.md` | 往已有 mod 加武器/服装/材料 |
+| 添加建筑 | `workflows/add-building.md` | 加建筑/工作台 |
+| 修改原版 | `workflows/patch-vanilla.md` | XML Patch 或 Harmony 改原版行为 |
+| 崩溃排查 | `workflows/debug-crash.md` | 红字/白窗/崩溃定位 |
+| 正规化 | `workflows/formalize-mod.md` | 测试通过后转正式版 |
+| 批量处理 | `workflows/batch-process.md` | 一次处理多个需求清单 |
+
+测试版先行流程：先生成可进游戏测试的测试版（允许 `test.` 前缀、引用原版贴图），开发者在游戏中验证无 bug 后再正规化（正式 packageId、原创贴图、Preview.png、多语言）。
+
+## 错误自学习
+
+`learnings/errors.txt` 记录历史错误教训。技能每次加载时自动读取，避免重复犯错；每次排查完错误并修复后，自动追加一条记录：
+
+```
+2026-07-28 | XML | ParentName 写错导致 Def 加载失败，需对照原版 BaseWeapons.xml
+2026-07-28 | C#  | Harmony patch ID 重复导致补丁冲突，需用唯一前缀
+```
 
 ## 参考文档
 
-技能在运行时按需加载 `references/` 下的六份深度参考，每份聚焦一个领域：
+11 份按编号排序的深度参考，覆盖制作全链路：
 
 | 文档 | 覆盖内容 |
 |------|---------|
-| `about-and-loadfolders.md` | `About.xml` 全字段说明、字段使用统计、`LoadFolders.xml` 条件加载机制与四种写法 |
-| `xml-defs.md` | 16 种常见 Def 类型、`ParentName` 继承机制、引用关系、代表性 Def 示例 |
-| `csharp-development.md` | SDK-style 项目配置、三种 Mod 入口模式、Harmony Patch 写法、ModSettings、自定义 Def/ThingComp、跨版本兼容 |
-| `patches.md` | 8 种 PatchOperation、XPath 用法、兼容补丁标准范式 |
-| `translation-and-assets.md` | Keyed/DefInjected 翻译系统、贴图路径规则、`graphicClass` 渲染类型、音效 |
-| `frameworks.md` | 12 个框架库清单、NuGet 包、DLC packageId、模组类型分布统计 |
+| `01-environment.md` | 环境搭建（RimWorld 1.6 / Unity 2022.3.35 / .NET 4.7.2+） |
+| `02-project-structure.md` | Mod 项目结构、About.xml、LoadFolders.xml |
+| `03-xml-defs.md` | 16 种 Def 类型、ParentName 继承、引用关系 |
+| `04-xml-patching.md` | 8 种 PatchOperation、XPath、兼容补丁范式 |
+| `05-csharp-basics.md` | C# 项目配置、Mod 入口、ModSettings、ThingComp、序列化 |
+| `06-harmony.md` | Prefix/Postfix/Transpiler、特殊参数、条件 Patch |
+| `07-assets.md` | 贴图路径、着色器/Mask、音效、翻译系统 |
+| `08-debugging.md` | 红字排查、Player.log 解读、常见崩溃定位 |
+| `09-workshop.md` | Steam Workshop 发布流程、预览图、描述规范 |
+| `10-api-reference.md` | RimWorld API 速查表 |
+| `frameworks.md` | 12 个框架库清单、NuGet 包、DLC packageId |
 
-所有代码示例取自真实模组（BionicIcons、Gunplay、yayoAni、Pick Up And Haul、EqualMilking、Ratkin），已在工坊目录中验证过写法的正确性。
+## 核心原则
 
-## 工作流程
+技能在生成任何模组时遵守以下约定：
 
-技能在接到模组制作需求后，按以下流程推进，根据模组类型动态决定加载哪份参考：
-
-```mermaid
-flowchart TD
-    A["明确模组类型"] --> B["创建模组骨架"]
-    B --> C{"需要哪类参考？"}
-    C -->|"XML 内容"| D1["xml-defs.md"]
-    C -->|"C# 功能"| D2["csharp-development.md"]
-    C -->|"兼容补丁"| D3["patches.md"]
-    C -->|"汉化 / 资源"| D4["translation-and-assets.md"]
-    C -->|"元数据 / 加载"| D5["about-and-loadfolders.md"]
-    C -->|"框架依赖"| D6["frameworks.md"]
-    D1 & D2 & D3 & D4 & D5 & D6 --> E["验证引用与输出"]
-```
-
-验证环节会检查 `texPath` 引用的贴图是否存在、Def 间的 `<li>` 引用是否指向已定义的 Def、C# 编译产物是否落到正确目录，避免最常见的加载失败。
+- **命名规范**：所有 defName 和 C# 类名使用用户自选的唯一前缀，AI 不预设作者信息
+- **安全实践**：Harmony 用唯一 patch ID、`[StaticConstructorOnStartup]` 初始化、优先用 PatchOperations 而非直接改原版
+- **法律边界**：禁止复制原版 C# 源码/DLL、禁止使用第三方 IP（宝可梦、星战等）；允许模仿 Def 结构、反编译查看 API 签名
+- **AI 标注**：生成内容在 About.xml 描述末尾、Workshop 页面、C# 文件头标注 `[AI 辅助生成]`
 
 ## 仓库结构
 
 ```
 .
-├── rimworld-mod-creator/        # 技能本体
-│   ├── SKILL.md                 # 技能入口与工作流程定义
-│   └── references/              # 六份按需加载的深度参考
-│       ├── about-and-loadfolders.md
-│       ├── csharp-development.md
-│       ├── frameworks.md
-│       ├── patches.md
-│       ├── translation-and-assets.md
-│       └── xml-defs.md
-├── docs/                        # GitHub Pages 站点
-│   ├── index.html               # 在线落地页
-│   ├── rimworld-mod-creator-v0.1.zip  # v0.1 下载包
+├── rimworld-mod-creator/              # 技能本体
+│   ├── SKILL.md                       # 入口：三层决策 + 快速导航 + 核心原则
+│   ├── references/                    # 11 份深度参考（按编号排序）
+│   │   ├── 01-environment.md
+│   │   ├── 02-project-structure.md
+│   │   ├── 03-xml-defs.md
+│   │   ├── 04-xml-patching.md
+│   │   ├── 05-csharp-basics.md
+│   │   ├── 06-harmony.md
+│   │   ├── 07-assets.md
+│   │   ├── 08-debugging.md
+│   │   ├── 09-workshop.md
+│   │   ├── 10-api-reference.md
+│   │   └── frameworks.md
+│   ├── templates/                     # 8 个代码模板（已验证原版结构）
+│   │   ├── weapon-melee.xml
+│   │   ├── weapon-ranged.xml
+│   │   ├── apparel.xml
+│   │   ├── resource-stuff.xml
+│   │   ├── building.xml
+│   │   ├── recipe.xml
+│   │   ├── harmony-patch.cs
+│   │   ├── thingcomp.cs
+│   │   └── requirements-template.md
+│   ├── workflows/                     # 7 套工作流
+│   │   ├── new-mod.md
+│   │   ├── add-item.md
+│   │   ├── add-building.md
+│   │   ├── patch-vanilla.md
+│   │   ├── debug-crash.md
+│   │   ├── formalize-mod.md
+│   │   └── batch-process.md
+│   └── learnings/
+│       └── errors.txt                 # 错误自学习记录
+├── docs/                              # GitHub Pages 站点
+│   ├── index.html                     # 在线落地页
+│   ├── rimworld-mod-creator-v0.2.zip  # v0.2 下载包（当前）
+│   ├── rimworld-mod-creator-v0.1.zip  # v0.1 下载包（归档）
 │   └── .nojekyll
-├── .github/workflows/           # CI：Pages 自动部署
+├── .github/workflows/                 # CI：Pages 自动部署
 │   └── deploy-pages.yml
-└── rimworld-mod-guide/          # 完整 HTML 指南（离线可读）
+└── rimworld-mod-guide/                # 完整 HTML 指南（离线可读）
     └── rimworld-mod-guide.html.zip
 ```
 
-`SKILL.md` 是技能的入口文件，定义了适用场景、工作流程和关键约定速查；`references/` 下的文档由技能在运行时按需加载，普通用户无需手动查阅。`docs/` 托管在线落地页与下载包，推送后由 GitHub Actions 自动部署到 Pages。`rimworld-mod-guide` 是同一套知识的独立 HTML 合集，解压后可在浏览器中通读。
-
 ## 下载与部署
 
-当前版本为 **v0.1**。两种获取方式：
+| 版本 | 下载 | 说明 |
+|------|------|------|
+| **v0.2（当前）** | [rimworld-mod-creator-v0.2.zip](./docs/rimworld-mod-creator-v0.2.zip) | 11 份参考 + 8 个模板 + 7 套工作流 + 错误学习 |
+| v0.1（归档） | [rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip) | 6 份参考，早期版本 |
 
-- **直接下载**：[rimworld-mod-creator-v0.1.zip](./docs/rimworld-mod-creator-v0.1.zip)，解压即得到 `SKILL.md` 与 6 份参考文档
-- **在线页面**：[GitHub Pages 落地页](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)，可在浏览器中预览技能概览
-
-下载包内容与仓库 `rimworld-mod-creator/` 目录一致，可直接放入支持 Skill 的 AI 助手的加载路径使用。
-
-GitHub Pages 通过 `.github/workflows/deploy-pages.yml` 自动部署：每当 `docs/` 目录有更新推送到主分支，Action 会重新构建并发布站点。首次使用需在仓库 Settings → Pages 中将 Source 设为 `GitHub Actions`。
+- **在线页面**：[GitHub Pages 落地页](https://luo2f.github.io/Rimworld-mod-skill-alpha-/)
+- 下载包解压即得完整 `rimworld-mod-creator/` 目录，放入支持 Skill 的 AI 助手加载路径即可使用
+- GitHub Pages 通过 `.github/workflows/deploy-pages.yml` 自动部署，首次需在 Settings → Pages 将 Source 设为 `GitHub Actions`
 
 ## 如何使用
 
-本技能是通用 AI Skill，可接入任意支持 Skill 的 AI 助手。将 `rimworld-mod-creator` 目录放入对应助手的知识/技能加载路径后，技能会被自动识别。之后用自然语言描述需求即可触发，无需记忆任何命令。
+本技能是通用 AI Skill，可接入任意支持 Skill 的 AI 助手。将 `rimworld-mod-creator` 目录放入对应助手的知识/技能加载路径后，技能会被自动识别。之后用自然语言描述需求即可触发：
 
-触发示例：
-
-- "帮我做一个 RimWorld 模组，新增一把中世纪弩"
+- "帮我做一个 RimWorld 模组，新增一把突击步枪"
 - "给这个 mod 写一个 Harmony patch，修改投射物速度"
-- "做一个 Ratkin 和 Facial Animation 的兼容补丁"
-- "把这个 mod 汉化成简体中文"
-- "About.xml 里 loadAfter 应该怎么写"
+- "游戏里报红字了，帮我排查"
+- "测试通过了，帮我正规化这个 mod"
+- "批量生成 5 把武器，需求清单在这个文件里"
 
-技能会先判断模组类型，再加载对应参考，最终产出符合工坊规范的文件结构与代码。
+技能会先判断走三层决策的哪条路径，加载对应模板或参考，生成测试版供你进游戏验证，确认无误后正规化输出。
 
-## 一段最小示例
+## 源码查阅工具
 
-新增一把中世纪弩，只需一个 `ThingDef`，继承自原版或自定义基类：
+技能内置两种原版源码查阅方式，按优先级使用：
 
-```xml
-<ThingDef ParentName="RK_NeolithicRangeWeapon">
-  <defName>RK_Crossbow</defName>
-  <label>cross bow</label>
-  <graphicData>
-    <texPath>Weapon/RK_Crossbow</texPath>
-    <graphicClass>Graphic_Single</graphicClass>
-  </graphicData>
-  <costList><WoodLog>40</WoodLog><Steel>20</Steel></costList>
-  <statBases>
-    <WorkToMake>2400</WorkToMake>
-    <RangedWeapon_Cooldown>1.2</RangedWeapon_Cooldown>
-  </statBases>
-  <verbs>
-    <li>
-      <verbClass>Verb_Shoot</verbClass>
-      <defaultProjectile>Bolt_RK_Crossbow</defaultProjectile>
-      <warmupTime>1.4</warmupTime>
-      <range>22.9</range>
-      <soundCast>Bow_Small</soundCast>
-    </li>
-  </verbs>
-  <tools>
-    <li><label>limb</label><power>9</power></li>
-  </tools>
-</ThingDef>
-```
+- **grep**（第一选择）：搜索原版 `Data/Core/Defs/` 目录，查字段用法、ParentName 定义、枚举取值
+- **dnSpy**（第二选择）：反编译 `Assembly-CSharp.dll`，查 C# 类和方法签名
 
-`texPath` 相对 `Textures/` 目录、不带扩展名、用正斜杠分隔；`defaultProjectile` 指向另定义的投射物 Def。这类约定在 `xml-defs.md` 与 `translation-and-assets.md` 中有完整说明。
+有模板的类型直接用模板，无需查阅任何源码。
 
-## 适用版本与 DLC
+## 适用版本
 
-技能覆盖 RimWorld 1.4 / 1.5 / 1.6，并适配全部 DLC。DLC 的 `packageId` 一览：
+目标版本 **RimWorld 1.6**（Unity 2022.3.35 / .NET Framework 4.7.2+）。DLC packageId 一览：
 
 | DLC | packageId |
 |-----|-----------|
@@ -166,8 +201,6 @@ GitHub Pages 通过 `.github/workflows/deploy-pages.yml` 自动部署：每当 `
 | 生物科技 Biotech | `Ludeon.RimWorld.Biotech` |
 | 异常 Anomaly | `Ludeon.RimWorld.Anomaly` |
 | 奥德赛 Odyssey | `Ludeon.RimWorld.Odyssey` |
-
-多版本支持通过 `LoadFolders.xml` 配合版本子目录实现，具体写法见 `about-and-loadfolders.md`。
 
 ## 许可证
 

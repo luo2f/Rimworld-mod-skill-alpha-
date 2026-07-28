@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  模板类型: 近战武器 ThingDef
+  验证状态: 已验证 —— 基于原版 BaseWeapons.xml
+  生成方式: AI 辅助生成
+  原版参考路径:
+    - Core/Defs/ThingDefs_Misc/Weapons/Weapons_Melee.xml
+    - Core/Defs/ThingDefs_Misc/BaseWeapons.xml
+    - Core/Defs/ThingDefs_Misc/Weapons/Weapons_Guns.xml（命名参考）
+  ParentName 继承链:
+    BaseWeapon
+      └─ BaseMeleeWeapon
+           └─ BaseMeleeWeapon_Sharp
+                └─ BaseMeleeWeapon_Sharp_Quality  <-- 本模板使用此 ParentName
+  关键设计决策:
+    1. BaseWeapon 已内置以下 Comp，无需在本模板中重复声明:
+       - CompProperties_Equippable   (可装备)
+       - CompProperties_Forbiddable  (可禁止)
+       - CompProperties_Styleable    (风格系统)
+    2. BaseMeleeWeapon_Sharp_Quality 已内置质量系统（CompQuality），
+       所以本模板只需填写业务字段。
+    3. 使用 costStuffCount + stuffCategories 实现材料可变制作，
+       而非 costList 固定材料。
+  使用方法:
+    - 将所有 <Your...> 占位符替换为实际值
+    - 删除不需要的注释行和可选节点
+    - defName 必须全局唯一，建议使用模组前缀
+  ============================================================
+-->
+<Defs>
+
+  <ThingDef ParentName="BaseMeleeWeapon_Sharp_Quality">
+    <!-- defName: 必须全局唯一，建议加模组前缀，如 YourMod_Plasmablade -->
+    <defName><YourDefName></defName>
+
+    <!-- label: 游戏内显示名称 -->
+    <label><YourLabel></label>
+
+    <!-- description: 游戏内描述文本 -->
+    <description><YourDescription></description>
+
+    <!-- possessionCount: 殖民者初始拥有数量（可选） -->
+    <possessionCount>1</possessionCount>
+
+    <!--
+      techLevel: 科技等级，可选值如下
+        Undefined    - 未定义
+        Animal       - 动物
+        Medieval     - 中世纪
+        Neolithic    - 新石器时代
+        Industrial   - 工业时代
+        Spacer       - 太空时代
+        Ultra        - 超级科技
+        Archotech    - 古神科技
+    -->
+    <techLevel>Industrial</techLevel>
+
+    <!-- costStuffCount: 制作所需的材料数量 -->
+    <costStuffCount>50</costStuffCount>
+
+    <!--
+      stuffCategories: 允许的制作材料类别，可选值如下
+        Metallic      - 金属类（钢、银、黄金、精炼可塑性等）
+        Woody         - 木材类
+        Stony         - 石材类
+        Leathery      - 皮革类
+        Fabric        - 布料类
+        Plastel       - 塑料类（DLC）
+    -->
+    <stuffCategories>
+      <li>Metallic</li>
+      <li>Woody</li>
+      <li>Stony</li>
+    </stuffCategories>
+
+    <!-- statBases: 基础属性 -->
+    <statBases>
+      <!-- WorkToMake: 制作工作量 -->
+      <WorkToMake>8000</WorkToMake>
+      <!-- Mass: 重量（影响携带和搬运） -->
+      <Mass>1.5</Mass>
+    </statBases>
+
+    <!-- equippedAngleOffset: 装备时持握角度偏移（可选） -->
+    <equippedAngleOffset>-65</equippedAngleOffset>
+
+    <!--
+      weaponTags: 武器标签，用于：
+        - 殖民者初始装备分配
+        - NPC 随机装备生成
+        - 任务奖励池筛选
+      常见原版标签: MeleeMedium / MeleeAdvanced / SpacerMelee
+    -->
+    <weaponTags>
+      <li><YourWeaponTag></li>
+    </weaponTags>
+
+    <!--
+      tools: 武器攻击方式定义
+      每个 tool 定义一种攻击动作，包含:
+        - label: 攻击名称（如 "handle" "blade" "point"）
+        - capacities: 攻击类型（Cut 砍 / Stab 刺 / Blunt 钝击 / Poke 捅）
+        - power: 单次伤害值
+        - cooldownTime: 攻击冷却时间（秒）
+        - armorPenetration: 穿甲值（0~1，1 表示无视护甲）
+      可定义多个 tool（如刀刃 Cut + 刀柄 Blunt）
+    -->
+    <tools>
+      <li>
+        <label>handle</label>
+        <capacities>
+          <li>Blunt</li>
+        </capacities>
+        <power>8</power>
+        <cooldownTime>1.6</cooldownTime>
+        <armorPenetration>0.1</armorPenetration>
+      </li>
+      <li>
+        <label>blade</label>
+        <capacities>
+          <li>Cut</li>
+        </capacities>
+        <power>16</power>
+        <cooldownTime>1.8</cooldownTime>
+        <armorPenetration>0.3</armorPenetration>
+      </li>
+    </tools>
+
+    <!--
+      graphicData: 图形显示配置
+      - texPath: 贴图路径（相对于 Textures/ 文件夹，不含扩展名）
+      - graphicClass: 图形类，Graphic_Single 表示单张静态图
+      - shaderType: 着色器，CutoutComplex 支持材质染色（推荐用于可变材料武器）
+    -->
+    <graphicData>
+      <texPath>Things/Item/Equipment/WeaponMelee/<YourTexPath></texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+    </graphicData>
+
+    <!-- uiIconScale: 装备栏图标缩放比例（可选，默认 1.0） -->
+    <uiIconScale>1.2</uiIconScale>
+
+    <!--
+      recipeMaker: 制作配方配置
+      - researchPrerequisite: 所需研究项目（必须为已存在的 ResearchProjectDef defName）
+      - skillRequirements: 技能需求（Craftsmanship 为制作技能）
+      - workAmount: 制作工作量（如不填则使用 statBases 中的 WorkToMake）
+    -->
+    <recipeMaker>
+      <researchPrerequisite><YourResearchDefName></researchPrerequisite>
+      <skillRequirements>
+        <Craftsmanship>6</Craftsmanship>
+      </skillRequirements>
+      <workAmount>8000</workAmount>
+    </recipeMaker>
+
+  </ThingDef>
+
+</Defs>

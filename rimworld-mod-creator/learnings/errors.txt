@@ -1,0 +1,4 @@
+# RimWorld Mod 制作错误学习记录
+# 格式: YYYY-MM-DD | <类别> | <一句话总结>
+# 类别: XML / C# / Harmony / Path / Other
+# 此文件在每次加载 Skill 时自动读取，排查完错误后必须追加记录

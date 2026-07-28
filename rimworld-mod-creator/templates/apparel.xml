@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  模板类型: 服装/护甲 ThingDef
+  验证状态: 已验证 —— 参考原版 Apparel_Various.xml
+  生成方式: AI 辅助生成
+  原版参考路径:
+    - Core/Defs/ThingDefs_Misc/Apparel/Apparel_Various.xml
+    - Core/Defs/ThingDefs_Misc/BaseApparel.xml
+  ParentName 继承链:
+    BaseApparel
+      └─ ApparelBase  <-- 本模板使用此 ParentName
+  关键设计决策:
+    1. ApparelBase 已内置以下内容:
+       - CompProperties_Forbiddable (可禁止)
+       - CompProperties_Quality (质量系统)
+       - CompProperties_Styleable (风格系统)
+       - 默认 thingCategories、可穿戴基础配置
+    2. 护甲值（ArmorRating_*）是乘以材料系数后的基础值，
+       实际护甲 = 基础值 × 材料系数 + 材料加成。
+    3. wornLayers 决定穿戴层级，多层叠加需注意冲突。
+    4. bodyPartGroups 决定覆盖的身体部位。
+  使用方法:
+    - 将所有 <Your...> 占位符替换为实际值
+    - 根据 bodyPartGroups 和 wornLayers 调整护甲类型
+    - 删除不需要的可选节点和注释
+  ============================================================
+-->
+<Defs>
+
+  <ThingDef ParentName="ApparelBase">
+    <!-- defName: 必须全局唯一，建议加模组前缀 -->
+    <defName><YourDefName></defName>
+
+    <!-- label: 游戏内显示名称 -->
+    <label><YourLabel></label>
+
+    <!-- description: 游戏内描述文本 -->
+    <description><YourDescription></description>
+
+    <!--
+      techLevel: 科技等级，可选值如下
+        Neolithic    - 新石器时代
+        Medieval     - 中世纪
+        Industrial   - 工业时代
+        Spacer       - 太空时代
+        Ultra        - 超级科技
+        Archotech    - 古神科技
+    -->
+    <techLevel>Industrial</techLevel>
+
+    <!-- costStuffCount: 可变材料的制作数量 -->
+    <costStuffCount>80</costStuffCount>
+
+    <!--
+      stuffCategories: 允许的制作材料类别
+        Metallic    - 金属类（钢、银、黄金、精炼可塑性等，用于护甲）
+        Fabric      - 布料类（布、超织物等，用于轻型服装）
+        Leathery    - 皮革类（各种皮革，用于中型护甲）
+    -->
+    <stuffCategories>
+      <li>Metallic</li>
+      <li>Fabric</li>
+      <li>Leathery</li>
+    </stuffCategories>
+
+    <!-- statBases: 基础属性（会被材料系数乘算/加算） -->
+    <statBases>
+      <!-- MaxHitPoints: 最大耐久度 -->
+      <MaxHitPoints>120</MaxHitPoints>
+      <!-- Flammability: 可燃性（0=不可燃，1=易燃） -->
+      <Flammability>0.4</Flammability>
+      <!-- ArmorRating_Sharp: 锐器护甲值（0~1） -->
+      <ArmorRating_Sharp>0.6</ArmorRating_Sharp>
+      <!-- ArmorRating_Blunt: 钝器护甲值（0~1） -->
+      <ArmorRating_Blunt>0.4</ArmorRating_Blunt>
+      <!-- ArmorRating_Heat: 热能护甲值（0~1，防火/等离子） -->
+      <ArmorRating_Heat>0.2</ArmorRating_Heat>
+      <!-- Insulation_Cold: 寒冷隔热值（正值保暖） -->
+      <Insulation_Cold>5</Insulation_Cold>
+      <!-- Insulation_Heat: 炎热隔热值（正值隔热） -->
+      <Insulation_Heat>0</Insulation_Heat>
+      <!-- Mass: 重量（影响移动速度） -->
+      <Mass>4.0</Mass>
+      <!-- EquipDelay: 穿戴/脱下所需时间（秒） -->
+      <EquipDelay>8</EquipDelay>
+    </statBases>
+
+    <!--
+      apparel: 服装穿戴配置
+      - bodyPartGroups: 覆盖的身体部位组
+          常见值: Torso / Skull / UpperHead / FullHead / Neck /
+                  Shoulder / Arms / Hands / Legs / Feet
+      - wornLayers: 穿戴层级（决定能否与其他衣物叠加）
+          BaseBottom  - 内层（贴身）
+          Middle      - 中层
+          Shell       - 外层（最外）
+          OnSkin      - 皮肤层
+          Overhead    - 头顶层
+      - layers: （部分版本中使用 layers 替代 wornLayers）
+      - careIfWornByCorpse: 尸体穿着时是否影响心情（true=会降低心情）
+      - dontCountInCostTradeability: 是否不计入成本交易性（可选）
+      - authoritasRoyalTier: 皇室等级需求（可选，需 Royalty DLC）
+          可选值: Decree / Acolyte / Knight / Priest / Baron /
+                  Consul / Stellarch / Emperor
+    -->
+    <apparel>
+      <bodyPartGroups>
+        <li>UpperHead</li>
+      </bodyPartGroups>
+      <wornLayers>
+        <li>Overhead</li>
+      </wornLayers>
+      <careIfWornByCorpse>true</careIfWornByCorpse>
+      <dontCountInCostTradeability>false</dontCountInCostTradeability>
+      <!-- 以下为可选节点，需要 Royalty DLC 时启用 -->
+      <!-- <authoritasRoyalTier>Baron</authoritasRoyalTier> -->
+    </apparel>
+
+    <!--
+      graphicData: 图形显示配置
+      - texPath: 贴图路径（相对于 Textures/ 文件夹，不含扩展名）
+      - graphicClass: Graphic_Single 表示单张静态图
+      - shaderType: CutoutComplex 支持材质染色
+      - onGroundRandomRotateAngle: 地面随机旋转角度（可选）
+      - drawSize: 绘制大小（可选，默认 1.0）
+    -->
+    <graphicData>
+      <texPath>Things/Pawn/Humanlike/Apparel/<YourTexPath>/<YourTexPath>_north</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+      <onGroundRandomRotateAngle>35</onGroundRandomRotateAngle>
+      <drawSize>(1, 1)</drawSize>
+    </graphicData>
+
+    <!--
+      recipeMaker: 制作配方配置
+      - researchPrerequisite: 所需研究项目
+      - skillRequirements: 技能需求
+      - workAmount: 制作工作量
+    -->
+    <recipeMaker>
+      <researchPrerequisite><YourResearchDefName></researchPrerequisite>
+      <skillRequirements>
+        <Craftsmanship>6</Craftsmanship>
+      </skillRequirements>
+      <workAmount>12000</workAmount>
+    </recipeMaker>
+
+    <!-- thingCategories: 物品分类（服装统一用 Apparel） -->
+    <thingCategories>
+      <li>Apparel</li>
+    </thingCategories>
+
+    <!--
+      colorGenerator（可选）: 染色系统配置
+      当服装使用可染色材料（如布料）时，可用此节点控制初始颜色随机化。
+      - ColorGenerator_White: 纯白
+      - ColorGenerator_Saturated: 饱和色（hueRange 控制色相范围）
+      - ColorGenerator_Options: 从颜色列表中随机选一个
+      如不需要颜色随机化，删除整个 colorGenerator 节点。
+    -->
+    <!--
+    <colorGenerator Class="ColorGenerator_Saturated">
+      <hueRange>0.0~0.1</hueRange>
+      <saturationRange>0.5~0.8</saturationRange>
+    </colorGenerator>
+    -->
+
+  </ThingDef>
+
+</Defs>

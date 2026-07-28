@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  模板类型: 配方 RecipeDef
+  验证状态: 已验证 —— 参考原版 RecipeDef
+  生成方式: AI 辅助生成
+  原版参考路径:
+    - Core/Defs/RecipeDefs/Recipes.xml
+    - Core/Defs/RecipeDefs/Recipes_Production.xml
+    - Core/Defs/RecipeDefs/Recipes_Surgery.xml
+  ParentName 继承链:
+    本模板不使用 ParentName（RecipeDef 通常独立定义）
+  关键设计决策:
+    1. RecipeDef 用于定义独立配方（如冶炼、加工、手术等）
+    2. 与 ThingDef 内置的 recipeMaker 不同:
+       - recipeMaker: 用于可制作的物品（武器、服装等），自动生成配方
+       - RecipeDef:   用于工作台的独立配方（如炼钢、烹饪、手术等）
+    3. recipeUsers 有两种写法（二选一）:
+       写法 A: 在 RecipeDef 中使用 recipeUsers 列表指定工作台
+       写法 B: 用 Patch 操作给工作台的 recipes 节点添加此 defName
+  使用方法:
+    - 将所有 <Your...> 占位符替换为实际值
+    - 选择 recipeUsers 的写法（A 或 B）
+    - 调整 ingredients 和 products 的数量和类型
+  ============================================================
+-->
+<Defs>
+
+  <RecipeDef>
+    <!-- defName: 必须全局唯一，建议加模组前缀 -->
+    <defName><YourDefName></defName>
+
+    <!-- label: 配方显示名称（如 "制作钢锭" "提炼塑料"） -->
+    <label><YourLabel></label>
+
+    <!-- description: 配方描述文本 -->
+    <description><YourDescription></description>
+
+    <!-- jobString: 执行任务时显示的文本（如 "正在制作钢锭"） -->
+    <jobString><YourJobString></jobString>
+
+    <!-- effectWorking: 工作时的特效 defName（如 Cook 搅拌特效） -->
+    <effectWorking>Cook</effectWorking>
+
+    <!-- soundWorking: 工作时的音效 defName -->
+    <soundWorking>Recipe_CookMeal</soundWorking>
+
+    <!-- allowMixingIngredients: 是否允许混合不同材料（true=可用任意材料组合） -->
+    <allowMixingIngredients>true</allowMixingIngredients>
+
+    <!-- adjustForFertility: 是否根据肥力调整产量（通常用于种植相关配方） -->
+    <adjustForFertility>false</adjustForFertility>
+
+    <!--
+      recipeUsers: 可执行此配方的工作台 defName 列表
+      ====================================================
+      写法 A（推荐，在 RecipeDef 中直接指定）:
+        <recipeUsers>
+          <li>ElectricStove</li>
+          <li>FueledStove</li>
+        </recipeUsers>
+
+      写法 B（用 Patch 给工作台添加配方，不在 RecipeDef 中写 recipeUsers）:
+        在 Patches/ 目录下创建 XML 文件:
+        <Patch>
+          <Operation Class="PatchOperationAdd">
+            <xpath>Defs/ThingDef[defName="ElectricStove"]/recipes</xpath>
+            <value>
+              <li><YourDefName></li>
+            </value>
+          </Operation>
+        </Patch>
+
+      注意: 如果使用写法 B，请删除此 recipeUsers 节点
+    -->
+    <recipeUsers>
+      <li><YourWorkbenchDefName></li>
+    </recipeUsers>
+
+    <!--
+      ingredients: 原材料需求列表
+      每个 li 定义一组材料需求:
+        - count: 所需数量
+        - filter: 材料过滤器（thingDefs 指定具体物品，
+                   categories 指定类别，stuffCategories 指定材料类别）
+      可定义多个 li（不同材料组），每组满足 count 数量即可
+    -->
+    <ingredients>
+      <li>
+        <count>10</count>
+        <filter>
+          <thingDefs>
+            <li>Steel</li>
+          </thingDefs>
+          <!-- disallowedCategories: 排除的物品分类 -->
+          <disallowedCategories>
+            <li>Corpses</li>
+          </disallowedCategories>
+        </filter>
+      </li>
+      <li>
+        <count>2</count>
+        <filter>
+          <thingDefs>
+            <li>ComponentIndustrial</li>
+          </thingDefs>
+        </filter>
+      </li>
+    </ingredients>
+
+    <!--
+      products: 产出物品列表
+      每个 li 定义一种产出:
+        - thingDef: 产出物品的 defName
+        - count: 产出数量
+      可定义多个 li（多种产出）
+    -->
+    <products>
+      <li>
+        <thingDef><YourProductDefName></thingDef>
+        <count>1</count>
+      </li>
+    </products>
+
+    <!--
+      fixedIngredientFilter: 固定材料过滤器
+      用于限定可选材料范围，配合 allowMixingIngredients 使用
+      - thingDefs: 允许的具体材料 defName
+      - disallowedCategories: 排除的物品分类
+      - disallowedThingDefs: 排除的具体材料 defName
+    -->
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>Steel</li>
+        <li>ComponentIndustrial</li>
+      </thingDefs>
+      <disallowedCategories>
+        <li>Corpses</li>
+      </disallowedCategories>
+    </fixedIngredientFilter>
+
+    <!--
+      defaultIngredientFilter: 默认材料过滤器
+      玩家可在此基础上自定义，通常与 fixedIngredientFilter 一致
+    -->
+    <defaultIngredientFilter>
+      <thingDefs>
+        <li>Steel</li>
+        <li>ComponentIndustrial</li>
+      </thingDefs>
+      <disallowedCategories>
+        <li>Corpses</li>
+      </disallowedCategories>
+    </defaultIngredientFilter>
+
+    <!--
+      workAmount: 工作量（决定制作时间，约 60 工作量 = 1 秒）
+      也可用 workSpeedStat 指定影响速度的属性（默认为 GeneralLaborSpeed）
+    -->
+    <workAmount>5000</workAmount>
+
+    <!--
+      skillRequirements: 技能需求
+      小人需达到指定技能等级才能执行此配方
+      常见技能: Crafting(制作) / Cooking(烹饪) / Intellectual(研究) /
+               Medical(医疗) / Construction(建造) / Plants(种植)
+    -->
+    <skillRequirements>
+      <Crafting>6</Crafting>
+    </skillRequirements>
+
+    <!--
+      以下为可选节点，按需添加:
+
+      researchPrerequisite: 所需研究项目（可选）
+      <researchPrerequisite><YourResearchDefName></researchPrerequisite>
+
+      recipeUsers 写法 B 的替代（使用 Patch 时不需要此节点）
+
+      unfinishedThingDef: 未完成时的物品贴图（可选，用于长制作时间配方）
+
+      workSkill: 影响制作速度和质量的技能（默认根据工作台决定）
+      <workSkill>Crafting</workSkill>
+
+      workSkillLearnFactor: 技能学习倍率（默认 1.0）
+      <workSkillLearnFactor>0.25</workSkillLearnFactor>
+
+      defaultIngredientFilter: 默认材料过滤器（可选）
+      这里的 defaultIngredientFilter 是初始默认显示的材料范围
+
+      targetCountAdjustment: 根据目标数量调整（可选）
+    -->
+
+  </RecipeDef>
+
+</Defs>

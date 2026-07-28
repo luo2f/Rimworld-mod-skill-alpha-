@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  模板类型: 远程武器 ThingDef
+  验证状态: 已验证 —— 基于原版 Weapons_Guns.xml
+  生成方式: AI 辅助生成
+  原版参考路径:
+    - Core/Defs/ThingDefs_Misc/Weapons/Weapons_Guns.xml
+    - Core/Defs/ThingDefs_Misc/BaseWeapons.xml
+  ParentName 继承链:
+    BaseGun
+      └─ BaseGunWithQuality
+           └─ BaseMakeableGun
+                └─ BaseHumanMakeableGun  <-- 本模板使用此 ParentName
+  关键设计决策:
+    1. BaseHumanMakeableGun 已内置以下内容:
+       - CompProperties_Equippable / CompProperties_Forbiddable / CompProperties_Styleable
+       - CompProperties_Quality（质量系统）
+       - recipeMaker 基础结构
+       - 默认 thingCategories = WeaponsRanged
+    2. 远程武器必须定义 verbs（射击行为）和 defaultProjectile（弹丸）
+    3. 远程武器仍需 tools 节点，用于近战攻击时的属性（枪托砸人）
+    4. costList 用于固定材料（如零部件），costStuffCount 用于可变材料
+  使用方法:
+    - 将所有 <Your...> 占位符替换为实际值
+    - defaultProjectile 必须为已存在的 ThingDef（如 Bullet_Revolver）
+    - 删除不需要的可选节点和注释
+  ============================================================
+-->
+<Defs>
+
+  <ThingDef ParentName="BaseHumanMakeableGun">
+    <!-- defName: 必须全局唯一，建议加模组前缀 -->
+    <defName><YourDefName></defName>
+
+    <!-- label: 游戏内显示名称 -->
+    <label><YourLabel></label>
+
+    <!-- description: 游戏内描述文本 -->
+    <description><YourDescription></description>
+
+    <!--
+      techLevel: 科技等级，可选值如下
+        Neolithic    - 新石器时代
+        Medieval     - 中世纪
+        Industrial   - 工业时代
+        Spacer       - 太空时代
+        Ultra        - 超级科技
+        Archotech    - 古神科技
+    -->
+    <techLevel>Industrial</techLevel>
+
+    <!-- costStuffCount: 可变材料的制作数量 -->
+    <costStuffCount>60</costStuffCount>
+
+    <!--
+      costList: 固定材料需求（不随材料变化）
+      常见材料 defName:
+        - Steel             - 钢
+        - ComponentIndustrial - 工业零部件
+        - ComponentSpacer     - 太空零部件
+        - Chemfuel          - 化学燃料
+        - Plasteel          - 精炼可塑性钢
+    -->
+    <costList>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+
+    <!-- statBases: 基础属性 -->
+    <statBases>
+      <!-- WorkToMake: 制作工作量 -->
+      <WorkToMake>15000</WorkToMake>
+      <!-- Mass: 重量 -->
+      <Mass>3.0</Mass>
+      <!-- MarketValue: 市场价值（可手动指定，否则自动计算） -->
+      <MarketValue>450</MarketValue>
+    </statBases>
+
+    <!--
+      weaponTags: 武器标签，用于分配和生成
+      常见原版标签: Gun / IndustrialGunAdvanced / SpacerGun
+    -->
+    <weaponTags>
+      <li><YourWeaponTag></li>
+    </weaponTags>
+
+    <!--
+      verbs: 射击行为定义
+      - verbClass: 动词类，远程武器统一用 Verb_Shoot
+      - hasStandardCommand: 是否使用标准射击指令（通常为 true）
+      - defaultProjectile: 弹丸 defName（必须为已存在的 ThingDef）
+      - range: 最大射程（格）
+      - warmupTime: 瞄准准备时间（秒）
+      - ticksBetweenBurstShots: 连发间隔（ticks，60 ticks = 1 秒）
+      - burstShotCount: 每次连发射击数
+      - soundCast: 射击音效 defName
+      - muzzleFlashScale: 枪口火焰缩放（可选）
+      - recoilPattern: 后坐力模式（可选 Regular / Mounted）
+    -->
+    <verbs>
+      <li>
+        <verbClass>Verb_Shoot</verbClass>
+        <hasStandardCommand>true</hasStandardCommand>
+        <defaultProjectile><YourProjectileDefName></defaultProjectile>
+        <warmupTime>1.2</warmupTime>
+        <range>28</range>
+        <ticksBetweenBurstShots>8</ticksBetweenBurstShots>
+        <burstShotCount>3</burstShotCount>
+        <soundCast>Shot_AssaultRifle</soundCast>
+        <soundCastTail>GunTail_Medium</soundCastTail>
+        <muzzleFlashScale>9</muzzleFlashScale>
+      </li>
+    </verbs>
+
+    <!--
+      tools: 近战攻击属性（远程武器被近身时使用）
+      通常只需一个 Blunt（枪托钝击）
+    -->
+    <tools>
+      <li>
+        <label>stock</label>
+        <capacities>
+          <li>Blunt</li>
+        </capacities>
+        <power>9</power>
+        <cooldownTime>2.0</cooldownTime>
+        <armorPenetration>0.1</armorPenetration>
+      </li>
+    </tools>
+
+    <!--
+      graphicData: 图形显示配置
+      - texPath: 贴图路径（相对于 Textures/ 文件夹，不含扩展名）
+      - graphicClass: Graphic_Single 表示单张静态图
+      - shaderType: CutoutComplex 支持材质染色
+      - onGroundRandomRotateAngle: 地面随机旋转角度（可选）
+    -->
+    <graphicData>
+      <texPath>Things/Item/Equipment/WeaponRanged/<YourTexPath></texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+      <onGroundRandomRotateAngle>35</onGroundRandomRotateAngle>
+    </graphicData>
+
+    <!--
+      recipeMaker: 制作配方配置
+      - researchPrerequisite: 所需研究项目
+      - skillRequirements: 技能需求
+      - workAmount: 制作工作量
+      - recipeUsers: 可在此指定制作工作台（不填则使用默认）
+    -->
+    <recipeMaker>
+      <researchPrerequisite><YourResearchDefName></researchPrerequisite>
+      <skillRequirements>
+        <Craftsmanship>6</Craftsmanship>
+      </skillRequirements>
+      <workAmount>15000</workAmount>
+    </recipeMaker>
+
+  </ThingDef>
+
+</Defs>

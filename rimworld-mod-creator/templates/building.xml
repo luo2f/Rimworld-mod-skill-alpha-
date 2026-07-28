@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================
+  模板类型: 建筑 ThingDef
+  验证状态: 已验证 —— 基于原版 Buildings_Production.xml 等
+  生成方式: AI 辅助生成
+  原版参考路径:
+    - Core/Defs/ThingDefs_Buildings/Buildings_Production.xml
+    - Core/Defs/ThingDefs_Buildings/Buildings_Furniture.xml
+    - Core/Defs/ThingDefs_Misc/Base Buildings.xml
+  ParentName 继承链:
+    BuildingBase  <-- 本模板使用此 ParentName
+  关键设计决策:
+    1. BuildingBase 已内置以下内容:
+       - CompProperties_Forbiddable (可禁止)
+       - 默认 category = Building
+       - 默认 selectable = true
+       - 默认 rotatable = false（需手动开启）
+       - 默认 drawPlaceWorkersWhileSelected = true
+    2. size 决定建筑占地（如 (1,1) = 1x1，(3,2) = 3x2）
+    3. passability 决定小人能否通过该建筑
+    4. fillPercent 决定建筑的遮挡程度
+    5. terrainAffordanceNeeded 决定需要什么类型的地基
+  使用方法:
+    - 将所有 <Your...> 占位符替换为实际值
+    - 根据 building 类型选择合适的 designationCategory
+    - 需要用电的务必添加 CompProperties_Power
+    - 删除不需要的可选节点和注释
+  ============================================================
+-->
+<Defs>
+
+  <ThingDef ParentName="BuildingBase">
+    <!-- defName: 必须全局唯一，建议加模组前缀 -->
+    <defName><YourDefName></defName>
+
+    <!-- label: 游戏内显示名称 -->
+    <label><YourLabel></label>
+
+    <!-- description: 游戏内描述文本 -->
+    <description><YourDescription></description>
+
+    <!--
+      size: 建筑占地尺寸 (宽, 高)
+      如 (1,1) = 单格，(3,2) = 3格宽 2格高
+    -->
+    <size>(3,1)</size>
+
+    <!--
+      designationCategory: 建筑菜单分类，可选值如下
+        Production    - 生产（工作台、加工设施）
+        Furniture     - 家具（床、椅子、桌子）
+        Structure     - 结构（墙、门）
+        Power         - 电力（发电机、电池）
+        Temperature   - 温度（空调、暖气）
+        Security      - 安全（炮塔、陷阱）
+        Recreation    - 娱乐（电视、棋盘）
+        Misc          - 其他
+        （留空或不设置则不显示在建筑菜单中）
+    -->
+    <designationCategory>Production</designationCategory>
+
+    <!-- statBases: 基础属性 -->
+    <statBases>
+      <!-- MaxHitPoints: 最大耐久度 -->
+      <MaxHitPoints>200</MaxHitPoints>
+      <!-- WorkToBuild: 建造工作量 -->
+      <WorkToBuild>4000</WorkToBuild>
+      <!-- Mass: 重量（影响搬运，建筑通常不搬运） -->
+      <Mass>30</Mass>
+      <!-- Flammability: 可燃性（0=不可燃） -->
+      <Flammability>1.0</Flammability>
+      <!-- Beauty: 美观度（负值=丑陋） -->
+      <Beauty>5</Beauty>
+    </statBases>
+
+    <!--
+      costList: 建造材料（固定，不随材料变化）
+      常见材料 defName:
+        - Steel             - 钢
+        - ComponentIndustrial - 工业零部件
+        - ComponentSpacer     - 太空零部件
+        - Plasteel          - 精炼可塑性钢
+        - WoodLog           - 原木
+        - Cloth             - 布料
+    -->
+    <costList>
+      <Steel>120</Steel>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+
+    <!--
+      passability: 可通过性
+        Impassable        - 不可通过（如墙）
+        PassThroughOnly   - 只能穿过不能停留（如门）
+        Standable         - 可停留可穿过（如地板上的物品）
+    -->
+    <passability>Impassable</passability>
+
+    <!-- fillPercent: 填充/遮挡程度（0.0~1.0，影响视线和遮挡） -->
+    <fillPercent>1.0</fillPercent>
+
+    <!--
+      terrainAffordanceNeeded: 所需地基承载力
+        Light   - 轻型（松软土地即可）
+        Medium  - 中型（需土壤或更硬）
+        Heavy   - 重型（需岩石或混凝土等）
+    -->
+    <terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
+
+    <!-- rotatable: 是否可旋转（true=有朝向） -->
+    <rotatable>true</rotatable>
+
+    <!--
+      comps: 组件列表，添加额外功能
+      常用建筑组件:
+        - CompProperties_Power        - 电力需求
+        - CompProperties_Breakdownable - 可故障
+        - CompProperties_Flickable     - 可开关
+        - CompProperties_Glower        - 发光
+        - CompProperties_HeatPusher    - 产热/吸热
+        - CompProperties_AffectedByFacilities - 可被设施加成
+    -->
+    <comps>
+      <!-- 电力需求组件 -->
+      <li Class="CompProperties_Power">
+        <compClass>CompPowerTrader</compClass>
+        <!-- basePowerConsumption: 基础功耗（负值=发电） -->
+        <basePowerConsumption>350</basePowerConsumption>
+        <!-- shortCircuitInRain: 雨中是否短路 -->
+        <shortCircuitInRain>true</shortCircuitInRain>
+      </li>
+
+      <!-- 可故障组件（需要定期维修） -->
+      <li Class="CompProperties_Breakdownable">
+        <breakdownThreshold>0</breakdownThreshold>
+      </li>
+
+      <!-- 可开关组件（可选，允许小人手动开关） -->
+      <!--
+      <li Class="CompProperties_Flickable" />
+      -->
+
+      <!-- 发光组件（可选） -->
+      <!--
+      <li Class="CompProperties_Glower">
+        <glowRadius>6</glowRadius>
+        <glowColor>(217,112,33,0)</glowColor>
+      </li>
+      -->
+    </comps>
+
+    <!--
+      graphicData: 图形显示配置
+      - texPath: 贴图路径（相对于 Textures/ 文件夹，不含扩展名）
+        对于可旋转建筑，需要提供 _north / _east / _south / _west 四张图
+        或使用 Graphic_Multi 自动匹配
+      - graphicClass: Graphic_Multi 用于多方向，Graphic_Single 用于单向
+      - shaderType: CutoutComplex 支持材质染色
+      - drawSize: 绘制大小 (x, y)，默认 (1,1)
+      - damageData: 受损贴图配置（可选）
+    -->
+    <graphicData>
+      <texPath>Things/Building/Production/<YourTexPath></texPath>
+      <graphicClass>Graphic_Multi</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+      <drawSize>(3,1)</drawSize>
+      <damageData>
+        <rect>(0.1,0.1,2.8,0.8)</rect>
+      </damageData>
+    </graphicData>
+
+    <!--
+      researchPrerequisites: 所需研究项目列表
+      必须为已存在的 ResearchProjectDef defName
+      可填写多个，表示需要全部完成才能建造
+    -->
+    <researchPrerequisites>
+      <li><YourResearchDefName></li>
+    </researchPrerequisites>
+
+    <!--
+      以下为可选节点，按需添加:
+
+      building: 建筑专用配置
+        - canPlaceOverWall: 可放置在墙上
+        - isEdifice: 是否为主建筑（非装饰）
+        - paintedFloor: 是否绘制地板
+
+      <building>
+        <canPlaceOverWall>true</canPlaceOverWall>
+      </building>
+
+      constructionEffectPrerequisites: 建造特效（可选）
+
+      placeWorkers: 放置规则限制（可选）
+        常见: PlaceWorker_ShowFacilitiesConnections /
+              PlaceWorker_OnlyUnderRoof /
+              PlaceWorker_NotUnderRoof
+    -->
+
+  </ThingDef>
+
+</Defs>
